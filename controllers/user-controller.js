@@ -12,77 +12,6 @@ import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import cartModel from "../models/cart.js";
 
-// Registering a user
-const register = async (req, res, next) => {
-  const payload = req.body;
-  const image = req.file?.path;
-
-  try {
-    const isExisting = await userModel.findOne({ email: payload.email });
-    if (isExisting) {
-      const err = new customApiError("Email already exist");
-      err.statusCode = StatusCodes.CONFLICT;
-      return next(err);
-    }
-    let result = null;
-
-    if (image) {
-      const uploading = await cloudinary.uploader.upload(image, {
-        resource_type: "image",
-      });
-      result = uploading.secure_url;
-      await fs.unlink(image);
-    }
-
-    const newUser = new userModel({
-      ...payload,
-      profilePics: result,
-      email: payload.email.toLowerCase(),
-    });
-    const saveUser = await newUser.save();
-
-    await cartModel.create({user: saveUser._id})
-
-    const token = saveUser.generateToken();
-
-    return res
-      .status(StatusCodes.OK)
-      .cookie("userToken", token, { maxAge: 60 * 60 * 1000, httpOnly: true })
-      .json({
-        user: { name: saveUser.name, image: saveUser.profilePics, token },
-      });
-  } catch (error) {
-    next(error);
-  }
-};
-
-//User Login
-const login = async (req, res, next) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await userModel.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      const err = new notFoundError("Email not found");
-      return next(err);
-    }
-
-    const comparePassword = await bcrypt.compare(password, user.password);
-    if (!comparePassword) {
-      const err = new notFoundError("Incorrect email or password");
-      return next(err);
-    }
-
-    const token = user.generateToken();
-
-    res
-      .status(StatusCodes.ACCEPTED)
-      .cookie("userToken", token, { maxAge: 60 * 60 * 1000, httpOnly: true })
-      .json({ user: user.name, token });
-  } catch (error) {
-    next(error);
-  }
-};
 
 //Admin getting all users
 const allUsers = async (req, res, next) => {
@@ -242,8 +171,6 @@ const updateProfile = async (req, res, next) => {
 };
 
 export {
-  register,
-  login,
   allUsers,
   getProfile,
   deleteProfile,

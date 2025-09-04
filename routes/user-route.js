@@ -1,7 +1,5 @@
 import express from "express";
 import {
-  register,
-  login,
   allUsers,
   getProfile,
   deleteProfile,
@@ -9,6 +7,7 @@ import {
   getUser,
   deleteUser,
 } from "../controllers/user-controller.js";
+import { login, logout, register } from "../controllers/auth-controller.js";
 import validateRequest from "../middlewares/validator.js";
 import {
   loginValidation,
@@ -24,7 +23,11 @@ userRouter
   .route("/register")
   .post(profilePicture, validateRequest(registerValidation), register);
 userRouter.route("/login").post(validateRequest(loginValidation), login);
-userRouter.route("/").get(Authentication, allUsers).get(Authentication, getUser);
+userRouter.route("/logout").get(logout);
+userRouter
+  .route("/")
+  .get(Authentication, allUsers)
+  .get(Authentication, getUser);
 userRouter
   .route("/profile")
   .get(Authentication, getProfile)
@@ -35,6 +38,9 @@ userRouter
     validateRequest(updateValidation),
     updateProfile
   );
-  userRouter.route("/single").get(Authentication, getUser).delete(Authentication, deleteUser);
+userRouter
+  .route("/single")
+  .get(Authentication, getUser)
+  .delete(Authentication, deleteUser);
 
 export default userRouter;
