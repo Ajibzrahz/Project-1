@@ -27,8 +27,10 @@ const register = async (req, res, next) => {
       result = uploading.secure_url;
       await fs.unlink(image);
     }
-    const isFirstAccount = (await userModel.countDocuments({})) === 0;
+
+    const isFirstAccount = (await userModel.estimatedDocumentCount({})) === 0;
     const role = isFirstAccount ? "admin" : "user";
+
     const newUser = new userModel({
       ...payload,
       profilePics: result,

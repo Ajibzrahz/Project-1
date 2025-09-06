@@ -8,6 +8,7 @@ import {
   unauthenticatedError,
 } from "../errors/index.js";
 import categoryModel from "../models/category.js";
+import mongoose from "mongoose";
 
 const createProduct = async (req, res, next) => {
   const { id, role } = req.user;

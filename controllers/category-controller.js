@@ -93,7 +93,7 @@ const updateCategory = async (req, res, next) => {
   try {
     const category = await categoryModel.findOne({ _id: id });
     if (!category) {
-      const err = notFoundError("category not found");
+      const err = new notFoundError("category not found");
       return next(err);
     }
 
